@@ -272,7 +272,9 @@ private:
 };
 
 @implementation WKWebsiteDataStore {
+#if HAVE(NW_PROXY_CONFIG)
     RetainPtr<NSArray> _proxyConfigurations;
+#endif
 }
 
 + (WKWebsiteDataStore *)defaultDataStore

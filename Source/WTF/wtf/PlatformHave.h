@@ -1353,7 +1353,7 @@
     || (PLATFORM(APPLETV) && __TV_OS_VERSION_MAX_ALLOWED >= 170000) \
     || PLATFORM(VISION))
 #if __has_include(<Network/proxy_config.h>)
-#define HAVE_NW_PROXY_CONFIG 1
+#define HAVE_NW_PROXY_CONFIG 0
 #endif
 #endif
 

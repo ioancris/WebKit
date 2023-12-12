@@ -98,6 +98,15 @@ void WebKit::NetworkSessionCocoa::removeNetworkWebsiteData(std::optional<WallTim
 #if __has_include(<Network/NSURLSession+Network.h>)
 #include <Network/NSURLSession+Network.h>
 #endif
+
+NW_OBJECT_DECL(nw_context);
+
+API_AVAILABLE(macos(14.0), ios(17.0), watchos(10.0), tvos(17.0))
+@interface NSURLSession (Network)
+
+@property nw_context_t _networkContext NS_REFINED_FOR_SWIFT;
+@end
+
 SOFT_LINK_LIBRARY_OPTIONAL(libnetwork)
 SOFT_LINK_OPTIONAL(libnetwork, nw_context_add_proxy, void, __cdecl, (nw_context_t, nw_proxy_config_t))
 SOFT_LINK_OPTIONAL(libnetwork, nw_context_clear_proxies, void, __cdecl, (nw_context_t))
@@ -2220,10 +2229,15 @@ void NetworkSessionCocoa::setProxyConfigData(Vector<std::pair<Vector<uint8_t>, W
 {
     auto* clearProxies = nw_context_clear_proxiesPtr();
     auto* addProxy = nw_context_add_proxyPtr();
+    if (!clearProxies || !addProxy)
+        return;
+
+#if __has_include(<Network/proxy_config_private.h>)
     auto* createProxyConfig = nw_proxy_config_create_with_agent_dataPtr();
     auto* requiresHTTPProtocols = nw_proxy_config_stack_requires_http_protocolsPtr();
-    if (!clearProxies || !addProxy || !createProxyConfig || !requiresHTTPProtocols)
+    if (!createProxyConfig || !requiresHTTPProtocols)
         return;
+#endif
 
     m_nwProxyConfigs.clear();
 

@@ -109,7 +109,7 @@ WK_CLASS_AVAILABLE(macos(10.11), ios(9.0))
 */
 + (void)fetchAllDataStoreIdentifiers:(void(^)(NSArray<NSUUID *> *))completionHandler WK_SWIFT_ASYNC_NAME(getter:allDataStoreIdentifiers()) WK_API_AVAILABLE(macos(WK_MAC_TBA), ios(WK_IOS_TBA));
 
-#if ((TARGET_OS_OSX && __MAC_OS_X_VERSION_MAX_ALLOWED >= 140000) \
+#if (defined HAVE_NW_PROXY_CONFIG && HAVE_NW_PROXY_CONFIG && (TARGET_OS_OSX && __MAC_OS_X_VERSION_MAX_ALLOWED >= 140000) \
     || ((TARGET_OS_IOS || TARGET_OS_MACCATALYST) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 170000) \
     || (TARGET_OS_WATCH && __WATCH_OS_VERSION_MAX_ALLOWED >= 100000) \
     || (TARGET_OS_TV && __TV_OS_VERSION_MAX_ALLOWED >= 170000))
@@ -117,7 +117,11 @@ WK_CLASS_AVAILABLE(macos(10.11), ios(9.0))
  @discussion Changing the proxy configurations might interupt current networking operations in any WKWebView that use this WKWebsiteDataStore,
  so it is encouraged to finish setting the proxy configurations before starting any page loads.
 */
+#if defined(OS_OBJECT_USE_OBJC) && OS_OBJECT_USE_OBJC
 @property (nullable, nonatomic, copy) NSArray<nw_proxy_config_t> *proxyConfigurations NS_REFINED_FOR_SWIFT API_AVAILABLE(macos(14.0), ios(17.0));
+#else
+@property (nullable, nonatomic, copy) NSArray *proxyConfigurations NS_REFINED_FOR_SWIFT API_AVAILABLE(macos(14.0), ios(17.0));
+#endif
 #endif
 
 @end
