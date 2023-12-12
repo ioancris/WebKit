@@ -43,6 +43,10 @@ StyleCustomPropertyData::StyleCustomPropertyData(const StyleCustomPropertyData& 
         m_ownValues = other.m_ownValues;
         m_ownValuesSizeExcludingOverriddenParentValues = other.m_ownValuesSizeExcludingOverriddenParentValues;
     }
+
+    m_equalityCachePartner = &other;
+    other.m_equalityCachePartner = this;
+    m_equalityCachedResult = other.m_equalityCachedResult = true;
 }
 
 const CSSCustomPropertyValue* StyleCustomPropertyData::get(const AtomString& name) const
@@ -62,6 +66,7 @@ void StyleCustomPropertyData::set(const AtomString& name, Ref<const CSSCustomPro
     auto addResult = m_ownValues.set(name, WTFMove(value));
     if (addResult.isNewEntry && (!m_parentValues || !m_parentValues->m_ownValues.contains(name)))
         ++m_ownValuesSizeExcludingOverriddenParentValues;
+    m_equalityCachePartner = nullptr;
 }
 
 bool StyleCustomPropertyData::operator==(const StyleCustomPropertyData& other) const
@@ -71,8 +76,13 @@ bool StyleCustomPropertyData::operator==(const StyleCustomPropertyData& other) c
 
     for (auto& entry : m_ownValues) {
         auto* otherValue = other.get(entry.key);
-        if (!otherValue || !entry.value->equals(*otherValue))
+        if (!otherValue || !entry.value->equals(*otherValue)) {
+            m_equalityCachedResult = other.m_equalityCachedResult = false;
+            if (otherValue) {
+                WTFLogAlways("(S) Diff prop value: %s - o: %s t: %s\n", entry.key.string().ascii().data(), otherValue->customCSSText().ascii().data(), entry.value->customCSSText().ascii().data());
+            }
             return false;
+        }
     }
 
     if (m_parentValues) {
@@ -81,11 +91,17 @@ bool StyleCustomPropertyData::operator==(const StyleCustomPropertyData& other) c
             if (m_ownValues.contains(entry.key))
                 continue;
             auto* otherValue = other.get(entry.key);
-            if (!otherValue || !entry.value->equals(*otherValue))
+            if (!otherValue || !entry.value->equals(*otherValue)) {
+                if (otherValue) {
+                    WTFLogAlways("(P) Diff prop value: %s - o: %s t: %s\n", entry.key.string().ascii().data(), otherValue->customCSSText().ascii().data(), entry.value->customCSSText().ascii().data());
+                }
+                m_equalityCachedResult = other.m_equalityCachedResult = false;
                 return false;
+            }
         }
     }
 
+    m_equalityCachedResult = other.m_equalityCachedResult = true;
     return true;
 }
 

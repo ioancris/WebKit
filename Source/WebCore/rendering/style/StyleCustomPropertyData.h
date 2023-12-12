@@ -55,6 +55,9 @@ private:
     RefPtr<const StyleCustomPropertyData> m_parentValues;
     CustomPropertyValueMap m_ownValues;
     unsigned m_ownValuesSizeExcludingOverriddenParentValues { 0 };
+
+    mutable const StyleCustomPropertyData* m_equalityCachePartner = nullptr;
+    mutable bool m_equalityCachedResult = false;
 };
 
 } // namespace WebCore
