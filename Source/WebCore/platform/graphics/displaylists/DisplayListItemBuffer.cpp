@@ -29,7 +29,6 @@
 #include "DisplayListItemBufferIdentifier.h"
 #include "DisplayListItems.h"
 #include "Filter.h"
-#include <wtf/FastMalloc.h>
 
 namespace WebCore {
 namespace DisplayList {
@@ -745,7 +744,7 @@ void ItemBuffer::shrinkToFit()
 {
     if (m_writableBuffer) {
         if (m_allocatedBuffers.last() == m_writableBuffer.data) {
-            m_writableBuffer.data = static_cast<uint8_t*>(fastRealloc(m_writableBuffer.data, m_writtenNumberOfBytes));
+            m_writableBuffer.data = static_cast<uint8_t*>(DisplayListItemBufferHandleMalloc::realloc(m_writableBuffer.data, m_writtenNumberOfBytes));
             m_writableBuffer.capacity = m_writtenNumberOfBytes;
             m_allocatedBuffers.last() = m_writableBuffer.data;
         } else
